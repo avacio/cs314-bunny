@@ -75,7 +75,11 @@ var bunnyMaterial = new THREE.ShaderMaterial({
   uniforms: { bunnyPosition: bunnyPosition,
   }
 });
-var eggMaterial = new THREE.ShaderMaterial();
+var eggMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    bunnyPosition: bunnyPosition,
+  }
+});
 
 // LOAD SHADERS
 var shaderFiles = [

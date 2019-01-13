@@ -2,17 +2,20 @@
 
 precision highp float;
 precision highp int;
+
+// HINT: YOU WILL NEED TO PASS IN THE CORRECT VARYING (SHARED) VARIABLE)
+uniform vec3 bunnyPosition;
+in vec4 ePos;
+in vec3 interpolatedNormal;
 out vec4 out_FragColor; 
 
-//uniform vec3 bunnyPosition; // TODO
-// HINT: YOU WILL NEED TO PASS IN THE CORRECT VARYING (SHARED) VARIABLE)
-//in vec3 interpolatedNormal; // TODO
-
 void main() {
-
   // HINT: YOU WILL NEED TO SET YOUR OWN DISTANCE THRESHOLD
+    float threshold = distance(ePos, vec4(bunnyPosition,0));
 
-  // Set constant color red
-  out_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // REPLACE ME
-//  out_FragColor = vec4(interpolatedNormal.x, interpolatedNormal.y, interpolatedNormal.z, 1.0); // REPLACE ME
+    if (threshold > 3.0) {
+      out_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      } else {
+        out_FragColor = vec4(1.0-interpolatedNormal.x, 1.0-interpolatedNormal.y, 1.0-interpolatedNormal.z, 1.0);
+    }
 }
