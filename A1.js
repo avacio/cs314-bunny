@@ -69,10 +69,13 @@ floor.parent = worldFrame;
 
 // UNIFORMS
 var bunnyPosition = {type: 'v3', value: new THREE.Vector3(0.0,0.0,0.0)};
+var isJumping = {type: 'int', value: 0}; // -1 if landing down; 0 if stationary; 1 if jumping up
+var jumpPosition = {type: 'v3', value: new THREE.Vector3(0.0,0.0,0.0)};
 
 // MATERIALS: specifying uniforms and shaders
 var bunnyMaterial = new THREE.ShaderMaterial({
   uniforms: { bunnyPosition: bunnyPosition,
+    jumpPosition: jumpPosition,
   }
 });
 var eggMaterial = new THREE.ShaderMaterial({
@@ -162,6 +165,11 @@ function checkKeyboard() {
   if (keyboard.pressed("X"))
     layEgg();
 
+  if (keyboard.pressed("Z")) {
+    if (isJumping === 0)
+      isJumping = 1;
+  } else { isJumping = 0; }
+
   bunnyMaterial.needsUpdate = true; // Tells three.js that some uniforms might have changed
   eggMaterial.needsUpdate = true;
 }
@@ -174,9 +182,28 @@ function layEgg() {
   scene.add(e);
 }
 
+function checkJump() {
+  switch (isJumping) {
+    case -1: {
+      jumpPosition.value.y -= 0.1;
+      if (jumpPosition.value.y < 0.0) { isJumping = 1; }
+      break;
+    }
+    case 0: {
+      if (jumpPosition.value.y > 0.0) { jumpPosition.value.y -= 0.1; }
+      break;
+    }
+    case 1: {
+      jumpPosition.value.y += 0.1;
+      if (jumpPosition.value.y > 6.0) { isJumping = -1; }
+    }
+  }
+}
+
 // SETUP UPDATE CALL-BACK
 function update() {
   checkKeyboard();
+  checkJump();
   requestAnimationFrame(update);
   renderer.render(scene, camera);
 }

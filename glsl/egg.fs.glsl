@@ -10,7 +10,6 @@ in vec3 interpolatedNormal;
 out vec4 out_FragColor; 
 
 void main() {
-  // HINT: YOU WILL NEED TO SET YOUR OWN DISTANCE THRESHOLD
     float threshold = distance(ePos, vec4(bunnyPosition,0));
 
     if (threshold > 3.0) {
