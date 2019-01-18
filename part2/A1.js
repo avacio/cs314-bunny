@@ -149,6 +149,10 @@ egg.scale.set(0.3, 0.4, 0.3);
 egg.parent = worldFrame;
 scene.add(egg);
 
+// GLOBAL VARIABLES
+var lastJump = {type: 'bool', value: false};
+lastJump = false;
+
 // LISTEN TO KEYBOARD
 var keyboard = new THREEx.KeyboardState();
 function checkKeyboard() {
@@ -168,8 +172,12 @@ function checkKeyboard() {
   if (keyboard.pressed("Z")) {
     if (isJumping === 0)
       isJumping = 1;
-  } else { isJumping = 0; }
-
+      // lastJump = false;
+  }
+  else if (isJumping !== 0) {
+    // lastJump = false;
+    isJumping = 0;
+  }
   bunnyMaterial.needsUpdate = true; // Tells three.js that some uniforms might have changed
   eggMaterial.needsUpdate = true;
 }
@@ -186,16 +194,33 @@ function checkJump() {
   switch (isJumping) {
     case -1: {
       jumpPosition.value.y -= 0.1;
-      if (jumpPosition.value.y < 0.0) { isJumping = 1; }
+      if (jumpPosition.value.y < 0.0) {
+        isJumping = 1;
+        lastJump = false;
+      }
       break;
     }
     case 0: {
-      if (jumpPosition.value.y > 0.0) { jumpPosition.value.y -= 0.1; }
+      // if (jumpPosition.value.y > 0.0) { jumpPosition.value.y -= 0.1; }
+      if (!lastJump) {
+        if(jumpPosition.value.y > 6.0)
+          lastJump=true;
+        else if (jumpPosition.value.y > 0.0)
+          jumpPosition.value.y += 0.1;
+      } else {
+        if(jumpPosition.value.y > 0.0)
+          jumpPosition.value.y -= 0.1;
+        else if (jumpPosition.value.y < 0.0)
+          lastJump = false;
+      }
       break;
     }
     case 1: {
       jumpPosition.value.y += 0.1;
-      if (jumpPosition.value.y > 6.0) { isJumping = -1; }
+      if (jumpPosition.value.y > 6.0) {
+        isJumping = -1;
+        lastJump = true;
+      }
     }
   }
 }
