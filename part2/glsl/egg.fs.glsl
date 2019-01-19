@@ -12,8 +12,10 @@ out vec4 out_FragColor;
 void main() {
     float threshold = distance(ePos, vec4(bunnyPosition,0));
 
-    if (threshold > 3.0) {
-      out_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    if (threshold > 6.0) {
+        out_FragColor = vec4(cos(bunnyPosition.x), sin(bunnyPosition.y), cos(bunnyPosition.z), 0.5);
+    } else if (threshold > 3.0) {
+      out_FragColor = vec4(1.0, sin(bunnyPosition.y), 1.0, 1.0);
       } else {
         out_FragColor = vec4(1.0-interpolatedNormal.x, 1.0-interpolatedNormal.y, 1.0-interpolatedNormal.z, 1.0);
     }

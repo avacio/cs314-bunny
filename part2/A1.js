@@ -58,6 +58,7 @@ floorTexture.repeat.set(2, 2);
 var floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
 var floorGeometry = new THREE.PlaneBufferGeometry(30, 30);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+
 floor.position.y = -0.1;
 floor.rotation.x = Math.PI / 2;
 scene.add(floor);
@@ -71,6 +72,9 @@ floor.parent = worldFrame;
 var bunnyPosition = {type: 'v3', value: new THREE.Vector3(0.0,0.0,0.0)};
 var isJumping = {type: 'int', value: 0}; // -1 if landing down; 0 if stationary; 1 if jumping up
 var jumpPosition = {type: 'v3', value: new THREE.Vector3(0.0,0.0,0.0)};
+var timeElapsed = {type: 'float', value: 0.0}; // pseudo time
+// timeElapsed = 0.0;
+// timeElapsed = 10.0;
 
 // MATERIALS: specifying uniforms and shaders
 var bunnyMaterial = new THREE.ShaderMaterial({
@@ -83,13 +87,21 @@ var eggMaterial = new THREE.ShaderMaterial({
     bunnyPosition: bunnyPosition,
   }
 });
+var followerMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    timeElapsed: timeElapsed,
+    bunnyPosition: bunnyPosition,
+  }
+});
 
 // LOAD SHADERS
 var shaderFiles = [
   'glsl/bunny.vs.glsl',
   'glsl/bunny.fs.glsl',
   'glsl/egg.vs.glsl',
-  'glsl/egg.fs.glsl'
+  'glsl/egg.fs.glsl',
+  'glsl/follower.vs.glsl',
+  'glsl/follower.fs.glsl'
 ];
 
 new THREE.SourceLoader().load(shaderFiles, function(shaders) {
@@ -98,6 +110,9 @@ new THREE.SourceLoader().load(shaderFiles, function(shaders) {
 
   eggMaterial.vertexShader = shaders['glsl/egg.vs.glsl'];
   eggMaterial.fragmentShader = shaders['glsl/egg.fs.glsl'];
+
+  followerMaterial.vertexShader = shaders['glsl/follower.vs.glsl'];
+  followerMaterial.fragmentShader = shaders['glsl/follower.fs.glsl'];
 })
 
 var ctx = renderer.context;
@@ -140,14 +155,18 @@ function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
 }
 
 loadOBJ('obj/bunny.obj', bunnyMaterial, 20, 0,-0.7,0, 0,0,0);
+loadOBJ('obj/bunny.obj', followerMaterial, 20, 5,-0.7,0, 0,0,0);
+loadOBJ('obj/bunny.obj', followerMaterial, 30, 0,-0.7,10.0, 0,0,0);
+loadOBJ('obj/bunny.obj', followerMaterial, 15, -6.6,-0.7,-15.0, 5.0,0,0);
+loadOBJ('obj/bunny.obj', followerMaterial, 23, 2.2,4.4, -4.3, 0.0,0,4.0);
 
 // CREATE EGG
 var eggGeometry = new THREE.SphereGeometry(1, 32, 32);
-var egg = new THREE.Mesh(eggGeometry, eggMaterial);
-egg.position.set(5.0, 0.3, 5.0);
-egg.scale.set(0.3, 0.4, 0.3);
-egg.parent = worldFrame;
-scene.add(egg);
+// var egg = new THREE.Mesh(eggGeometry, eggMaterial);
+// egg.position.set(5.0, 0.3, 5.0);
+// egg.scale.set(0.3, 0.4, 0.3);
+// egg.parent = worldFrame;
+// scene.add(egg);
 
 // GLOBAL VARIABLES
 var lastJump = {type: 'bool', value: false};
@@ -172,19 +191,20 @@ function checkKeyboard() {
   if (keyboard.pressed("Z")) {
     if (isJumping === 0)
       isJumping = 1;
-      // lastJump = false;
   }
   else if (isJumping !== 0) {
-    // lastJump = false;
     isJumping = 0;
   }
   bunnyMaterial.needsUpdate = true; // Tells three.js that some uniforms might have changed
   eggMaterial.needsUpdate = true;
+  followerMaterial.needsUpdate = true;
 }
 
 function layEgg() {
   var e = new THREE.Mesh(eggGeometry, eggMaterial);
-  e.position.set(bunnyPosition.value.x, 0.3, bunnyPosition.value.z);
+  // e.position.set(bunnyPosition.value.x, 0.3, bunnyPosition.value.z);
+  e.position.set(bunnyPosition.value.x, jumpPosition.value.y + 0.3, bunnyPosition.value.z);
+
   e.scale.set(0.3, 0.4, 0.3);
   e.parent = worldFrame;
   scene.add(e);
@@ -227,6 +247,8 @@ function checkJump() {
 
 // SETUP UPDATE CALL-BACK
 function update() {
+  timeElapsed += 0.1;
+  // timeElapsed += 1.0;
   checkKeyboard();
   checkJump();
   requestAnimationFrame(update);
